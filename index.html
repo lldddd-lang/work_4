@@ -13,21 +13,32 @@
             theme: {
                 extend: {
                     colors: {
-                        'exo-yellow': '#FFC100',
-                        'exo-yellow-light': '#FFD54F',
-                        'exo-dark': '#0A0A0F',
-                        'exo-surface': '#13131A',
-                        'exo-border': '#1E1E2A',
-                        'exo-gray': '#9CA3AF',
+                        'exo-yellow': '#FFC107', // Deep yellow for accents
+                        'exo-yellow-light': '#FFF8E1',
+                        'exo-dark': '#111827',
+                        'exo-gray': '#F3F4F6',
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace'],
                     },
                     boxShadow: {
-                        'soft': '0 4px 30px -2px rgba(0, 0, 0, 0.3)',
-                        'glow': '0 0 20px rgba(255,193,0,0.35)',
-                        'glow-lg': '0 0 40px rgba(255,193,0,0.25)',
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(255, 193, 7, 0.3)',
+                    },
+                    keyframes: {
+                        breathing: {
+                            '0%, 100%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.05)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        }
+                    },
+                    animation: {
+                        breathing: 'breathing 6s ease-in-out infinite',
+                        float: 'float 6s ease-in-out infinite',
                     }
                 }
             }
@@ -38,157 +49,82 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
         rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-3.1.1.min.js"></script>
     <style>
         ::-webkit-scrollbar {
             width: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #0A0A0F;
+            background: #fff;
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #2A2A3A;
+            background: #FFC107;
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #FFC100;
+            background: #E6AF06;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0A0A0F;
-            color: #E5E7EB;
+            background-color: #ffffff;
+            color: #111827;
             overflow-x: hidden;
         }
 
         .tech-grid {
-            background-image:
-                linear-gradient(to right, rgba(255, 193, 0, 0.04) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(255, 193, 0, 0.04) 1px, transparent 1px);
+            background-image: linear-gradient(to right, #f3f4f6 1px, transparent 1px),
+                linear-gradient(to bottom, #f3f4f6 1px, transparent 1px);
             background-size: 40px 40px;
         }
 
-        #particle-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-
-        .glass-card {
-            background: rgba(255, 255, 255, 0.03);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            transition: all 0.4s cubic-bezier(.4, 0, .2, 1);
-        }
-
-        .glass-card:hover {
-            border-color: rgba(255, 193, 0, 0.3);
-            box-shadow: 0 0 30px rgba(255, 193, 0, 0.1);
-            transform: translateY(-4px);
-        }
-
-        .gold-gradient-text {
-            background: linear-gradient(135deg, #FFC100 0%, #FFD54F 50%, #FFC100 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .gold-glow {
-            text-shadow: 0 0 30px rgba(255, 193, 0, 0.4), 0 0 60px rgba(255, 193, 0, 0.15);
-        }
-
-        .btn-gold {
-            background: linear-gradient(135deg, #FFC100, #FFD54F);
-            color: #0A0A0F;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(255, 193, 0, 0.3);
-        }
-
-        .btn-gold:hover {
-            transform: translateY(-2px) scale(1.03);
-            box-shadow: 0 6px 30px rgba(255, 193, 0, 0.5);
-        }
-
-        .btn-outline-gold {
-            border: 2px solid rgba(255, 193, 0, 0.4);
-            color: #FFC100;
-            background: transparent;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-gold:hover {
-            background: rgba(255, 193, 0, 0.1);
-            border-color: #FFC100;
-            box-shadow: 0 0 20px rgba(255, 193, 0, 0.15);
-        }
-
-        .fade-in-up {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.7s cubic-bezier(.4, 0, .2, 1);
-        }
-
-        .fade-in-up.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .orb {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            pointer-events: none;
-            z-index: 0;
-        }
-
-        .separator-glow {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(255, 193, 0, 0.3), transparent);
+        .yellow-glow-text {
+            text-shadow: 0 0 20px rgba(255, 193, 7, 0.4);
         }
     </style>
 </head>
 
-<body class="antialiased bg-exo-dark">
+<body class="antialiased bg-white">
 
     <!-- Header -->
-    <header id="header" class="fixed w-full top-0 z-50 bg-[#0A0A0F]/80 backdrop-blur-xl border-b border-white/5">
+    <header id="header" class="fixed w-full top-0 z-50 bg-white/90 backdrop-blur-md border-b border-gray-100">
         <div class="max-w-[1440px] mx-auto px-8 h-20 flex items-center justify-between">
             <div class="flex items-center gap-3">
+                <!-- Logo Placehoder using provided inspiration -->
                 <div class="w-8 h-8 text-exo-yellow">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 370.504 370.506" fill="currentColor">
-                        <path
-                            d="M172.08,369.3a28.857,28.857,0,0,1-7.891-26.143c-.807-12.814-4.364-16.61-4.364-16.61l.033-.03-21.381-21.381-.051.045s-3.324-4.223-19.82-5.919l-.034,0a28.881,28.881,0,1,1,24.363-24.684c.025.111.048.227.067.346.022-.435.046-.866.08-1.3.031-.319.052.4.052,1.1a9.032,9.032,0,0,1-.025,1.118.63.63,0,0,1-.021-.183c-.019-.263-.046-.505-.086-.735a32.933,32.933,0,0,0,5.2,18.942l23.127,23.127c1.864,1.43,6.822,4.015,17.739,3.192l.382-.025A28.882,28.882,0,1,1,172.08,369.3Zm78.186-78.188a28.878,28.878,0,1,1,20.421,8.459A28.878,28.878,0,0,1,250.266,291.107Zm78.186-78.185a28.878,28.878,0,1,1,20.421,8.459A28.878,28.878,0,0,1,328.451,212.922Zm-156.371,0a29.176,29.176,0,0,1-2.2-2.464q-.108-.1-.217-.2a46.817,46.817,0,0,0-18.918-10.333H76.706l-.006.07s-8.136.813-16.324,8.208a28.846,28.846,0,1,1,.433-30.713c7.659,7.177,13.729,7.568,14.67,7.584h75.531a34.531,34.531,0,0,0,17.6-8.808,28.885,28.885,0,1,1,3.469,36.657Zm78.186-78.185a28.878,28.878,0,1,1,20.421,8.459A28.878,28.878,0,0,1,250.266,134.736Zm-156.371,0a28.883,28.883,0,0,1,27.2-48.5c.279.006.57.021.876.047,7.674.64,12.117-1.742,14.271-3.465l1.637-1.637,23.13-23.132c1.332-1.736,3.665-6.159,3.313-15.592a28.884,28.884,0,1,1,29.858,22.5c-.583.046-1.222.071-1.922.073-16.916.05-21.691,4.527-21.691,4.527l-.03-.034L149.151,90.909l.045.05a1.281,1.281,0,0,0-.232.137l-.875.875c-1.329,1.689-3.525,6.061-4.662,17.091-.1.921-.218,1.744-.364,2.475a28.881,28.881,0,0,1-49.169,23.2Z"
-                            transform="translate(-7.249 -7.249)" />
+                    <svg viewBox="0 0 100 100" fill="currentColor">
+                        <circle cx="50" cy="50" r="10" />
+                        <circle cx="20" cy="50" r="8" />
+                        <circle cx="80" cy="50" r="8" />
+                        <circle cx="50" cy="20" r="8" />
+                        <circle cx="50" cy="80" r="8" />
+                        <path d="M28 50 L42 50 M58 50 L72 50 M50 28 L50 42 M50 58 L50 72" stroke="currentColor"
+                            stroke-width="4" stroke-linecap="round" />
                     </svg>
                 </div>
-                <span class="text-xl font-bold tracking-tight text-white">ExoBrain</span>
+                <span class="text-xl font-bold tracking-tight text-exo-dark">ExoBrain</span>
             </div>
 
             <nav class="hidden lg:flex items-center gap-8">
-                <a href="#" class="text-sm font-medium text-gray-400 hover:text-exo-yellow transition-colors">Home</a>
+                <a href="#" class="text-sm font-medium text-gray-600 hover:text-exo-yellow transition-colors">Home</a>
                 <a href="#"
-                    class="text-sm font-medium text-gray-400 hover:text-exo-yellow transition-colors">Product</a>
-                <a href="#" class="text-sm font-medium text-gray-400 hover:text-exo-yellow transition-colors">How It
+                    class="text-sm font-medium text-gray-600 hover:text-exo-yellow transition-colors">Product</a>
+                <a href="#" class="text-sm font-medium text-gray-600 hover:text-exo-yellow transition-colors">How It
                     Works</a>
                 <a href="#"
-                    class="text-sm font-medium text-gray-400 hover:text-exo-yellow transition-colors">Network</a>
+                    class="text-sm font-medium text-gray-600 hover:text-exo-yellow transition-colors">Network</a>
                 <a href="#"
-                    class="text-sm font-medium text-gray-400 hover:text-exo-yellow transition-colors">Developers</a>
-                <a href="#" class="text-sm font-medium text-gray-400 hover:text-exo-yellow transition-colors">Noos
+                    class="text-sm font-medium text-gray-600 hover:text-exo-yellow transition-colors">Developers</a>
+                <a href="#" class="text-sm font-medium text-gray-600 hover:text-exo-yellow transition-colors">Noos
                     Network</a>
-                <a href="#" class="text-sm font-medium text-gray-400 hover:text-exo-yellow transition-colors"><i
+                <a href="#" class="text-sm font-medium text-gray-600 hover:text-exo-yellow transition-colors"><i
                         class="fa-brands fa-x-twitter"></i></a>
             </nav>
 
-            <button class="lg:hidden text-white">
+            <button class="lg:hidden text-gray-900">
                 <i class="fa-solid fa-bars text-xl"></i>
             </button>
         </div>
@@ -196,73 +132,82 @@
 
     <!-- 01 Hero Section -->
     <section id="hero" class="relative pt-32 pb-20 min-h-[800px] flex items-center tech-grid overflow-hidden">
-        <canvas id="particle-canvas"></canvas>
-        <div class="orb w-[500px] h-[500px] bg-[#FFC100] opacity-[0.06] top-[10%] right-[10%]"></div>
-        <div class="orb w-[300px] h-[300px] bg-[#FFC100] opacity-[0.04] bottom-[20%] left-[5%]"></div>
-
         <div
-            class="max-w-[1440px] mx-auto px-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
-            <div>
+            class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-yellow-50/50 to-transparent pointer-events-none">
+        </div>
+
+        <div class="max-w-[1440px] mx-auto px-8 w-full grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div class="z-10">
                 <div
-                    class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FFC100]/10 border border-[#FFC100]/20 text-xs font-semibold text-exo-yellow mb-6">
+                    class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-50 border border-yellow-200 text-xs font-semibold text-yellow-700 mb-6">
                     <span class="w-2 h-2 rounded-full bg-exo-yellow animate-pulse"></span>
                     ExoBrain Testnet Live
                 </div>
-                <h1 class="text-7xl font-extrabold tracking-tight mb-4 leading-tight gold-gradient-text gold-glow">
+                <h1 class="text-6xl font-bold tracking-tight text-gray-900 mb-4 leading-tight">
                     ExoBrain
                 </h1>
-                <h2 class="text-3xl font-medium text-gray-400 mb-6">
+                <h2 class="text-3xl font-medium text-gray-500 mb-6">
                     Intelligent Compute Hardware for the AGI Economy
                 </h2>
-                <p class="text-xl text-gray-500 mb-8 font-light border-l-4 border-exo-yellow pl-4">
+                <p class="text-xl text-gray-600 mb-8 font-light border-l-4 border-exo-yellow pl-4">
                     A Native Compute Node for the AGI Network
                 </p>
-                <p class="text-lg text-gray-300 font-medium mb-10">
+                <p class="text-lg text-gray-800 font-medium mb-10">
                     ExoBrain converts real AI computation into verifiable on-chain intelligence.
                 </p>
 
                 <div class="flex flex-wrap gap-4">
-                    <button class="px-8 py-4 btn-gold rounded-xl flex items-center gap-2 group text-base">
+                    <button
+                        class="px-8 py-4 bg-exo-dark text-white font-semibold rounded-lg hover:bg-gray-800 transition-all shadow-lg hover:shadow-xl flex items-center gap-2 group">
                         Join Testnet
-                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                        <i
+                            class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform text-exo-yellow"></i>
                     </button>
-                    <button class="px-8 py-4 btn-outline-gold rounded-xl font-semibold text-base">
+                    <button
+                        class="px-8 py-4 bg-white border-2 border-gray-200 text-gray-900 font-semibold rounded-lg hover:border-exo-yellow hover:text-exo-yellow transition-all shadow-sm">
                         Run Nodes
                     </button>
                 </div>
             </div>
 
             <div class="relative h-[600px] w-full flex items-center justify-center">
-                <div class="relative w-full h-full">
-                    <img class="w-full h-full object-contain"
-                        src="https://storage.googleapis.com/uxpilot-auth.appspot.com/c677ccce89-5bfe054707568d1c9ee9.png"
+                <!-- Abstract 3D Node Visualization Placeholder -->
+                <div class="relative w-full h-full animate-[breathing_6s_ease-in-out_infinite]">
+                    <img class="w-full h-full object-contain animate-[spin_30s_linear_infinite]" src="./tubiao.png"
                         alt="futuristic white and yellow abstract 3d geometric sphere network node, clean minimalist style, high tech hardware visualization, white background" />
                 </div>
 
-                <!-- Floating Elements -->
-                <div class="absolute top-1/4 -left-10 glass-card p-4 rounded-xl z-20 animate-bounce"
-                    style="animation-duration: 3s;">
-                    <div class="flex items-center gap-3">
+                <!-- Floating Elements (Apple-style polish) -->
+                <div
+                    class="absolute top-1/4 -left-12 bg-white/70 backdrop-blur-md px-5 py-3 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 z-20 group cursor-pointer transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 animate-[float_6s_ease-in-out_infinite]">
+                    <div class="flex items-center gap-4">
                         <div
-                            class="w-10 h-10 rounded-full bg-[#FFC100]/15 flex items-center justify-center text-exo-yellow">
-                            <i class="fa-solid fa-microchip"></i>
+                            class="relative flex items-center justify-center w-8 h-8 rounded-full bg-exo-yellow/20 border border-exo-yellow/30 text-exo-yellow transition-transform duration-500 group-hover:scale-110">
+                            <i class="fa-solid fa-microchip text-xs group-hover:animate-pulse"></i>
                         </div>
                         <div>
-                            <div class="text-xs text-gray-500">Compute Status</div>
-                            <div class="text-sm font-bold text-white">Active Node</div>
+                            <div class="text-[10px] font-mono text-gray-400 uppercase tracking-widest mb-0.5">Compute
+                                Status</div>
+                            <div class="text-sm font-semibold text-gray-900 leading-none">Active Node</div>
                         </div>
                     </div>
                 </div>
 
-                <div class="absolute bottom-1/4 -right-5 glass-card p-4 rounded-xl z-20 animate-bounce"
-                    style="animation-duration: 4s;">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-400">
-                            <i class="fa-solid fa-link"></i>
+                <div
+                    class="absolute bottom-1/4 -right-8 bg-white/70 backdrop-blur-md px-5 py-3 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/60 z-20 group cursor-pointer transition-all duration-500 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] hover:-translate-y-1 animate-[float_7s_ease-in-out_infinite_reverse]">
+                    <div class="flex items-center gap-4">
+                        <div
+                            class="relative flex items-center justify-center w-8 h-8 rounded-full bg-gray-900/5 border border-gray-900/10 transition-transform duration-500 group-hover:rotate-12">
+                            <svg class="w-4 h-4 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                            </svg>
                         </div>
                         <div>
-                            <div class="text-xs text-gray-500">Network</div>
-                            <div class="text-sm font-bold text-white">Verifiable</div>
+                            <div class="text-[10px] font-mono text-gray-400 uppercase tracking-widest mb-0.5">Network
+                            </div>
+                            <div class="text-sm font-semibold text-gray-900 leading-none">Verifiable</div>
                         </div>
                     </div>
                 </div>
@@ -270,249 +215,333 @@
         </div>
     </section>
 
-    <div class="separator-glow"></div>
-
     <!-- 02 World View Anchor -->
-    <section id="worldview" class="py-24 bg-exo-surface relative">
-        <div class="orb w-[400px] h-[400px] bg-[#FFC100] opacity-[0.03] top-[20%] left-[50%] -translate-x-1/2"></div>
-        <div class="max-w-[1440px] mx-auto px-8 relative z-10">
-            <div class="text-center max-w-3xl mx-auto mb-16 fade-in-up">
-                <h2 class="text-4xl font-bold mb-4 text-white">From Physical Compute to On-Chain Intelligence</h2>
-                <p class="text-xl text-gray-400">ExoBrain converts raw GPU computation into verifiable on-chain
+    <section id="worldview" class="py-24 bg-white relative">
+        <div class="max-w-[1440px] mx-auto px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-4xl font-bold mb-4">From Physical Compute to On-Chain Intelligence</h2>
+                <p class="text-xl text-gray-600">ExoBrain converts raw GPU computation into verifiable on-chain
                     intelligence contributions.</p>
             </div>
 
-            <div class="relative py-12 px-8 glass-card rounded-3xl fade-in-up">
+            <div class="relative py-12 px-8 bg-gray-50 rounded-3xl border border-gray-100">
                 <div class="flex flex-col lg:flex-row justify-between items-center gap-8 relative z-10">
                     <!-- Step 1 -->
                     <div class="text-center group w-full lg:w-auto">
                         <div
-                            class="w-20 h-20 mx-auto bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
-                            <i class="fa-solid fa-server text-3xl text-gray-500 group-hover:text-exo-yellow"></i>
+                            class="w-20 h-20 mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
+                            <i class="fa-solid fa-server text-3xl text-gray-400 group-hover:text-exo-yellow"></i>
                         </div>
-                        <h3 class="font-bold text-white">GPU</h3>
+                        <h3 class="font-bold text-gray-900">GPU</h3>
                     </div>
 
                     <!-- Arrow -->
-                    <div class="hidden lg:block flex-1 h-[2px] bg-white/10 relative">
+                    <div class="hidden lg:block flex-1 h-[2px] bg-gray-200 relative">
                         <i
-                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-white/20"></i>
+                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-gray-300"></i>
                     </div>
 
                     <!-- Step 2 (Highlighted) -->
                     <div class="text-center group w-full lg:w-auto relative">
-                        <div class="absolute -inset-4 bg-[#FFC100]/10 rounded-3xl -z-10 blur-sm"></div>
+                        <div class="absolute -inset-4 bg-yellow-100/50 rounded-3xl -z-10 blur-sm"></div>
                         <div
                             class="w-24 h-24 mx-auto bg-exo-yellow rounded-2xl shadow-glow flex items-center justify-center mb-4 transform scale-110">
-                            <i class="fa-solid fa-brain text-4xl text-exo-dark"></i>
+                            <i class="fa-solid fa-brain text-4xl text-white"></i>
                         </div>
-                        <h3 class="font-bold text-white text-lg">ExoBrain</h3>
+                        <h3 class="font-bold text-gray-900 text-lg">ExoBrain</h3>
                         <span
-                            class="text-xs font-mono text-exo-yellow bg-[#FFC100]/10 px-2 py-1 rounded mt-2 inline-block">CORE
+                            class="text-xs font-mono text-yellow-600 bg-yellow-50 px-2 py-1 rounded mt-2 inline-block">CORE
                             NODE</span>
                     </div>
 
                     <!-- Arrow -->
-                    <div class="hidden lg:block flex-1 h-[2px] bg-white/10 relative">
+                    <div class="hidden lg:block flex-1 h-[2px] bg-gray-200 relative">
                         <i
-                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-white/20"></i>
+                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-gray-300"></i>
                     </div>
 
                     <!-- Step 3 -->
                     <div class="text-center group w-full lg:w-auto">
                         <div
-                            class="w-20 h-20 mx-auto bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
-                            <i class="fa-solid fa-fingerprint text-3xl text-gray-500 group-hover:text-exo-yellow"></i>
+                            class="w-20 h-20 mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
+                            <i class="fa-solid fa-fingerprint text-3xl text-gray-400 group-hover:text-exo-yellow"></i>
                         </div>
-                        <h3 class="font-bold text-white">PoAC</h3>
+                        <h3 class="font-bold text-gray-900">PoAC</h3>
                     </div>
 
                     <!-- Arrow -->
-                    <div class="hidden lg:block flex-1 h-[2px] bg-white/10 relative">
+                    <div class="hidden lg:block flex-1 h-[2px] bg-gray-200 relative">
                         <i
-                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-white/20"></i>
+                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-gray-300"></i>
                     </div>
 
                     <!-- Step 4 -->
                     <div class="text-center group w-full lg:w-auto">
                         <div
-                            class="w-20 h-20 mx-auto bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
-                            <i class="fa-solid fa-network-wired text-3xl text-gray-500 group-hover:text-exo-yellow"></i>
+                            class="w-20 h-20 mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
+                            <i class="fa-solid fa-network-wired text-3xl text-gray-400 group-hover:text-exo-yellow"></i>
                         </div>
-                        <h3 class="font-bold text-white">Noos</h3>
+                        <h3 class="font-bold text-gray-900">Noos</h3>
                     </div>
 
                     <!-- Arrow -->
-                    <div class="hidden lg:block flex-1 h-[2px] bg-white/10 relative">
+                    <div class="hidden lg:block flex-1 h-[2px] bg-gray-200 relative">
                         <i
-                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-white/20"></i>
+                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-gray-300"></i>
                     </div>
 
                     <!-- Step 5 -->
                     <div class="text-center group w-full lg:w-auto">
                         <div
-                            class="w-20 h-20 mx-auto bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
-                            <i class="fa-solid fa-robot text-3xl text-gray-500 group-hover:text-exo-yellow"></i>
+                            class="w-20 h-20 mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
+                            <i class="fa-solid fa-robot text-3xl text-gray-400 group-hover:text-exo-yellow"></i>
                         </div>
-                        <h3 class="font-bold text-white">Noema &amp; Agents</h3>
+                        <h3 class="font-bold text-gray-900">Noema & Agents</h3>
                     </div>
 
                     <!-- Arrow -->
-                    <div class="hidden lg:block flex-1 h-[2px] bg-white/10 relative">
+                    <div class="hidden lg:block flex-1 h-[2px] bg-gray-200 relative">
                         <i
-                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-white/20"></i>
+                            class="fa-solid fa-chevron-right absolute right-0 top-1/2 -translate-y-1/2 text-gray-300"></i>
                     </div>
 
                     <!-- Step 6 -->
                     <div class="text-center group w-full lg:w-auto">
                         <div
-                            class="w-20 h-20 mx-auto bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
-                            <i class="fa-solid fa-layer-group text-3xl text-gray-500 group-hover:text-exo-yellow"></i>
+                            class="w-20 h-20 mx-auto bg-white rounded-2xl shadow-sm border border-gray-200 flex items-center justify-center mb-4 group-hover:border-exo-yellow transition-colors">
+                            <i class="fa-solid fa-layer-group text-3xl text-gray-400 group-hover:text-exo-yellow"></i>
                         </div>
-                        <h3 class="font-bold text-white">Applications</h3>
+                        <h3 class="font-bold text-gray-900">Applications</h3>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="separator-glow"></div>
-
     <!-- 03 Why ExoBrain -->
-    <section id="why" class="py-24 bg-exo-dark tech-grid relative">
-        <div class="orb w-[400px] h-[400px] bg-[#FFC100] opacity-[0.03] bottom-0 right-[10%]"></div>
-        <div class="max-w-[1440px] mx-auto px-8 relative z-10">
-            <div class="text-center mb-16 fade-in-up">
-                <h2 class="text-4xl font-bold mb-4 text-white">AGI Requires Verifiable Intelligence — Not Just More
-                    Compute</h2>
-                <p class="text-xl text-gray-400 max-w-2xl mx-auto">Unmeasured or unsettled intelligence cannot become
+    <section id="why" class="py-24 bg-gray-50 tech-grid">
+        <div class="max-w-[1440px] mx-auto px-8">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">AGI Requires Verifiable Intelligence — Not Just More Compute</h2>
+                <p class="text-xl text-gray-600 max-w-2xl mx-auto">Unmeasured or unsettled intelligence cannot become
                     productive input to AGI.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group fade-in-up">
-                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <i class="fa-solid fa-black-hole text-8xl text-white"></i>
+                <!-- Card 1 -->
+                <div
+                    class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-black-hole text-8xl text-gray-800"></i>
                     </div>
-                    <div class="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-6 text-red-400">
+                    <div class="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center mb-6 text-red-500">
                         <i class="fa-solid fa-triangle-exclamation text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Output Black Hole</h3>
-                    <p class="text-gray-400 leading-relaxed">Intelligent outputs cannot be reliably measured or
+                    <h3 class="text-xl font-bold mb-3">Output Black Hole</h3>
+                    <p class="text-gray-600 leading-relaxed">Intelligent outputs cannot be reliably measured or
                         attributed in current systems.</p>
                 </div>
 
-                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group fade-in-up">
-                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <i class="fa-solid fa-filter-circle-xmark text-8xl text-white"></i>
+                <!-- Card 2 -->
+                <div
+                    class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-filter-circle-xmark text-8xl text-gray-800"></i>
                     </div>
-                    <div class="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-6 text-red-400">
+                    <div class="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center mb-6 text-red-500">
                         <i class="fa-solid fa-droplet-slash text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Value Leakage</h3>
-                    <p class="text-gray-400 leading-relaxed">Model and agent improvements fail to persist or compound
+                    <h3 class="text-xl font-bold mb-3">Value Leakage</h3>
+                    <p class="text-gray-600 leading-relaxed">Model and agent improvements fail to persist or compound
                         over time.</p>
                 </div>
 
-                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group fade-in-up">
-                    <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
-                        <i class="fa-solid fa-box text-8xl text-white"></i>
+                <!-- Card 3 -->
+                <div
+                    class="bg-white p-8 rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-box text-8xl text-gray-800"></i>
                     </div>
-                    <div class="w-12 h-12 bg-red-500/10 rounded-lg flex items-center justify-center mb-6 text-red-400">
+                    <div class="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center mb-6 text-red-500">
                         <i class="fa-solid fa-eye-slash text-xl"></i>
                     </div>
-                    <h3 class="text-xl font-bold mb-3 text-white">Compute Black Box</h3>
-                    <p class="text-gray-400 leading-relaxed">There is no reliable way to verify whether compute is
+                    <h3 class="text-xl font-bold mb-3">Compute Black Box</h3>
+                    <p class="text-gray-600 leading-relaxed">There is no reliable way to verify whether compute is
                         actually used for real AI tasks.</p>
                 </div>
             </div>
 
-            <div class="flex flex-col items-center fade-in-up">
-                <div class="h-16 w-[2px] bg-gradient-to-b from-white/10 to-exo-yellow mb-4"></div>
+            <div class="flex flex-col items-center">
+                <div class="h-16 w-[2px] bg-gradient-to-b from-gray-300 to-exo-yellow mb-4"></div>
                 <div
-                    class="bg-exo-yellow text-exo-dark px-8 py-3 rounded-full font-bold shadow-glow flex items-center gap-2">
+                    class="bg-exo-yellow text-white px-8 py-3 rounded-full font-bold shadow-glow flex items-center gap-2">
                     <i class="fa-solid fa-check-circle"></i> Solved by ExoBrain
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="separator-glow"></div>
-
     <!-- 04 What ExoBrain Does -->
-    <section id="role" class="py-24 bg-exo-surface relative overflow-hidden">
-        <div class="orb w-[400px] h-[400px] bg-[#FFC100] opacity-[0.04] left-0 top-1/2 -translate-y-1/2"></div>
-        <div class="max-w-[1440px] mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center relative z-10">
+    <section id="role" class="py-24 bg-white relative overflow-hidden">
+        <div class="absolute left-0 top-1/2 -translate-y-1/2 w-64 h-64 bg-yellow-50 rounded-full blur-3xl -z-10"></div>
+        <div class="max-w-[1440px] mx-auto px-8 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
 
-            <div class="order-2 lg:order-1 relative fade-in-up">
-                <div class="relative glass-card rounded-3xl p-8">
-                    <div class="space-y-6">
-                        <div class="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
+            <div class="order-2 lg:order-1 relative">
+                <div
+                    class="relative bg-white/40 backdrop-blur-xl rounded-3xl p-6 md:p-8 border border-white shadow-[0_8px_40px_rgb(0,0,0,0.04)]">
+                    <div
+                        class="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent rounded-3xl pointer-events-none">
+                    </div>
+
+                    <div class="relative space-y-2">
+                        <!-- Step 1 -->
+                        <div
+                            class="group flex items-start gap-5 p-5 rounded-2xl hover:bg-white transition-all duration-300 border border-transparent hover:border-gray-100 hover:shadow-[0_4px_20px_rgb(0,0,0,0.03)] cursor-pointer">
+                            <!-- Custom Icon 1: Node/Core -->
                             <div
-                                class="w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center text-gray-400">
-                                <i class="fa-solid fa-microchip"></i>
+                                class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center border border-gray-200/80 shadow-[0_2px_8px_rgba(0,0,0,0.04)] shrink-0 overflow-hidden group-hover:shadow-md transition-all duration-500">
+                                <div
+                                    class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,0,0,0.03),transparent)] group-hover:scale-150 transition-transform duration-700">
+                                </div>
+                                <svg class="w-6 h-6 text-gray-800 relative z-10 group-hover:scale-110 group-hover:text-black transition-all duration-500"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M12 2v20"
+                                        class="group-hover:stroke-exo-yellow transition-colors duration-500 delay-100">
+                                    </path>
+                                    <path d="M2 12h20"
+                                        class="group-hover:stroke-exo-yellow transition-colors duration-500 delay-100">
+                                    </path>
+                                    <rect x="8" y="8" width="8" height="8" rx="2" fill="currentColor" stroke="none"
+                                        class="group-hover:scale-90 transition-transform duration-500 origin-center text-gray-800 group-hover:text-gray-900">
+                                    </rect>
+                                    <circle cx="12" cy="12" r="2" fill="white" stroke="none"></circle>
+                                </svg>
                             </div>
-                            <div>
-                                <h4 class="font-bold text-white">Execute AI Tasks</h4>
-                                <p class="text-sm text-gray-500">Standardized computation</p>
+                            <div class="pt-1">
+                                <h4
+                                    class="font-bold text-gray-900 mb-1 text-lg group-hover:text-exo-yellow transition-colors">
+                                    Execute AI Tasks</h4>
+                                <p class="text-sm text-gray-500 font-medium tracking-wide">Standardized computation
+                                    environment</p>
                             </div>
-                            <i class="fa-solid fa-arrow-down ml-auto text-white/20"></i>
                         </div>
-                        <div class="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
+
+                        <!-- Connector -->
+                        <div class="w-[2px] h-6 bg-gradient-to-b from-gray-200 to-gray-100 ml-11"></div>
+
+                        <!-- Step 2 -->
+                        <div
+                            class="group flex items-start gap-5 p-5 rounded-2xl hover:bg-white transition-all duration-300 border border-transparent hover:border-exo-yellow/20 hover:shadow-[0_4px_20px_rgb(255,193,7,0.05)] cursor-pointer">
+                            <!-- Custom Icon 2: Abstract Shield/Verification -->
                             <div
-                                class="w-12 h-12 bg-[#FFC100]/15 rounded-lg flex items-center justify-center text-exo-yellow">
-                                <i class="fa-solid fa-shield-halved"></i>
+                                class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-50 to-yellow-100/50 flex items-center justify-center border border-yellow-200/80 shadow-[0_2px_10px_rgba(255,193,7,0.1)] shrink-0 overflow-hidden group-hover:shadow-[0_4px_15px_rgba(255,193,7,0.2)] transition-all duration-500">
+                                <div
+                                    class="absolute w-8 h-8 bg-exo-yellow/20 rounded-full blur-md group-hover:bg-exo-yellow/40 transition-colors duration-500">
+                                </div>
+                                <svg class="w-6 h-6 text-yellow-600 relative z-10 transition-all duration-700 ease-in-out"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"
+                                        stroke-linejoin="round"></polygon>
+                                    <polygon points="12 6 17 9.5 17 14.5 12 18 7 14.5 7 9.5 12 6"
+                                        stroke-linejoin="round"
+                                        class="opacity-40 group-hover:opacity-100 group-hover:stroke-exo-yellow transition-all duration-500">
+                                    </polygon>
+                                    <!-- sonar pulse center -->
+                                    <circle cx="12" cy="12" r="2" fill="currentColor" stroke="none"
+                                        class="group-hover:scale-[1.8] group-hover:text-exo-yellow transition-all duration-500 origin-center">
+                                    </circle>
+                                    <!-- sonar pulse ring -->
+                                    <circle cx="12" cy="12" r="2" stroke="currentColor" stroke-width="1"
+                                        class="opacity-0 group-hover:animate-[ping_2s_cubic-bezier(0,0,0.2,1)_infinite] transition-all origin-center">
+                                    </circle>
+                                </svg>
                             </div>
-                            <div>
-                                <h4 class="font-bold text-white">Submit Cryptographic Proofs</h4>
-                                <p class="text-sm text-gray-500">PoAC Verification</p>
+                            <div class="pt-1">
+                                <h4
+                                    class="font-bold text-gray-900 mb-1 text-lg group-hover:text-exo-yellow transition-colors">
+                                    Submit Cryptographic Proofs</h4>
+                                <p class="text-sm text-gray-500 font-medium tracking-wide">PoAC Verification mechanism
+                                </p>
                             </div>
-                            <i class="fa-solid fa-arrow-down ml-auto text-white/20"></i>
                         </div>
-                        <div class="flex items-center gap-4 bg-white/5 p-4 rounded-xl border border-white/5">
+
+                        <!-- Connector -->
+                        <div class="w-[2px] h-6 bg-gradient-to-b from-gray-100 to-gray-200 ml-11"></div>
+
+                        <!-- Step 3 -->
+                        <div
+                            class="group flex items-start gap-5 p-5 rounded-2xl hover:bg-white transition-all duration-300 border border-transparent hover:border-gray-900/10 hover:shadow-[0_4px_20px_rgb(0,0,0,0.05)] cursor-pointer">
+                            <!-- Custom Icon 3: Blockchain/Weight Accumulation -->
                             <div
-                                class="w-12 h-12 bg-exo-yellow rounded-lg flex items-center justify-center text-exo-dark">
-                                <i class="fa-solid fa-weight-scale"></i>
+                                class="relative w-12 h-12 rounded-xl bg-gradient-to-br from-exo-dark to-gray-800 flex items-center justify-center border border-gray-700 shadow-[0_4px_12px_rgba(0,0,0,0.2)] shrink-0 overflow-hidden group-hover:border-gray-500 transition-all duration-500">
+                                <div
+                                    class="absolute inset-0 opacity-20 bg-[linear-gradient(rgba(255,255,255,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[size:4px_4px] group-hover:scale-110 transition-transform duration-700">
+                                </div>
+                                <div
+                                    class="absolute inset-0 flex items-center justify-center pointer-events-none mix-blend-screen opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                                    <div class="w-6 h-6 bg-exo-yellow/30 rounded-full blur-md"></div>
+                                </div>
+                                <svg class="w-[22px] h-[22px] text-white relative z-10" viewBox="0 0 24 24" fill="none"
+                                    stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                                    stroke-linejoin="round">
+                                    <rect x="4" y="14" width="16" height="6" rx="1" fill="currentColor"
+                                        fill-opacity="0.2"
+                                        class="group-hover:-translate-y-1 transition-transform duration-300"></rect>
+                                    <rect x="6" y="8" width="12" height="4" rx="1" fill="currentColor"
+                                        fill-opacity="0.6"
+                                        class="group-hover:-translate-y-2 transition-transform duration-300 delay-75">
+                                    </rect>
+                                    <rect x="8" y="2" width="8" height="4" rx="1" fill="currentColor"
+                                        class="group-hover:-translate-y-3 transition-transform duration-300 delay-150">
+                                    </rect>
+                                </svg>
                             </div>
-                            <div>
-                                <h4 class="font-bold text-white">Accumulate Intelligence Weight</h4>
-                                <p class="text-sm text-gray-500">On-chain Settlement</p>
+                            <div class="pt-1">
+                                <h4
+                                    class="font-bold text-gray-900 mb-1 text-lg group-hover:text-exo-yellow transition-colors">
+                                    Accumulate Intelligence Weight</h4>
+                                <p class="text-sm text-gray-500 font-medium tracking-wide">Automated On-chain Settlement
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="order-1 lg:order-2 fade-in-up">
-                <h2 class="text-4xl font-bold mb-6 text-white">The Physical Computation Layer of the AGI Stack</h2>
+            <div class="order-1 lg:order-2">
+                <h2 class="text-4xl font-bold mb-6">The Physical Computation Layer of the AGI Stack</h2>
+
                 <div class="space-y-8">
                     <div class="flex gap-4">
                         <div
-                            class="w-10 h-10 rounded-full bg-[#FFC100]/10 border border-[#FFC100]/30 flex-shrink-0 flex items-center justify-center text-exo-yellow font-bold">
+                            class="w-10 h-10 rounded-full bg-yellow-50 border border-yellow-200 flex-shrink-0 flex items-center justify-center text-yellow-600 font-bold">
                             1</div>
                         <div>
-                            <h3 class="text-xl font-bold mb-2 text-white">Standardized Execution</h3>
-                            <p class="text-gray-400">The only standardized node that executes real AI computation for
+                            <h3 class="text-xl font-bold mb-2">Standardized Execution</h3>
+                            <p class="text-gray-600">The only standardized node that executes real AI computation for
                                 the network.</p>
                         </div>
                     </div>
+
                     <div class="flex gap-4">
                         <div
-                            class="w-10 h-10 rounded-full bg-[#FFC100]/10 border border-[#FFC100]/30 flex-shrink-0 flex items-center justify-center text-exo-yellow font-bold">
+                            class="w-10 h-10 rounded-full bg-yellow-50 border border-yellow-200 flex-shrink-0 flex items-center justify-center text-yellow-600 font-bold">
                             2</div>
                         <div>
-                            <h3 class="text-xl font-bold mb-2 text-white">Measurable Architecture</h3>
-                            <p class="text-gray-400">The only hardware architecture eligible for PoAC-based measurement
+                            <h3 class="text-xl font-bold mb-2">Measurable Architecture</h3>
+                            <p class="text-gray-600">The only hardware architecture eligible for PoAC-based measurement
                                 and reward distribution.</p>
                         </div>
                     </div>
+
                     <div class="flex gap-4">
                         <div
-                            class="w-10 h-10 rounded-full bg-[#FFC100]/10 border border-[#FFC100]/30 flex-shrink-0 flex items-center justify-center text-exo-yellow font-bold">
+                            class="w-10 h-10 rounded-full bg-yellow-50 border border-yellow-200 flex-shrink-0 flex items-center justify-center text-yellow-600 font-bold">
                             3</div>
                         <div>
-                            <h3 class="text-xl font-bold mb-2 text-white">Critical Interface</h3>
-                            <p class="text-gray-400">The sole interface between physical computation and on-chain
+                            <h3 class="text-xl font-bold mb-2">Critical Interface</h3>
+                            <p class="text-gray-600">The sole interface between physical computation and on-chain
                                 settlement.</p>
                         </div>
                     </div>
@@ -521,180 +550,206 @@
         </div>
     </section>
 
-    <div class="separator-glow"></div>
-
     <!-- 05 How It Works (PoAC) -->
-    <section id="poac" class="py-24 bg-exo-dark text-white relative tech-grid">
-        <div class="orb w-[500px] h-[500px] bg-[#FFC100] opacity-[0.04] top-[10%] right-[5%]"></div>
+    <section id="poac" class="py-24 bg-yellow-50 text-gray-900 relative">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10">
+        </div>
         <div class="max-w-[1440px] mx-auto px-8 relative z-10">
-            <div class="text-center mb-16 fade-in-up">
+            <div class="text-center mb-16">
                 <h2 class="text-4xl font-bold mb-4">Network Weight Is Determined by Intelligence</h2>
                 <h3 class="text-2xl text-gray-500 mb-6 font-light">Not Compute Capacity</h3>
-                <p class="text-xl text-exo-yellow">PoAC measures and rewards verifiable AI intelligence contributions.
+                <p class="text-xl text-yellow-600 font-medium">PoAC measures and rewards verifiable AI intelligence
+                    contributions.
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-in-up">
-                <div class="col-span-1 lg:col-span-2 glass-card rounded-2xl p-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Mechanism Column -->
+                <div
+                    class="col-span-1 lg:col-span-2 bg-white/60 backdrop-blur-sm rounded-2xl p-8 border border-yellow-100 shadow-sm">
                     <h4 class="text-lg font-bold mb-8 text-gray-400 uppercase tracking-wider">Three-Step Mechanism</h4>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div
-                            class="bg-white/5 p-6 rounded-xl border border-white/5 hover:border-exo-yellow transition-colors">
+                            class="bg-white p-6 rounded-xl border border-gray-100 hover:border-exo-yellow transition-all shadow-sm hover:shadow-md">
                             <i class="fa-solid fa-laptop-code text-3xl text-exo-yellow mb-4"></i>
                             <h5 class="font-bold mb-2">Local Computation</h5>
-                            <p class="text-sm text-gray-400">Nodes perform AI tasks locally.</p>
+                            <p class="text-sm text-gray-500">Nodes perform AI tasks locally.</p>
                         </div>
                         <div
-                            class="bg-white/5 p-6 rounded-xl border border-white/5 hover:border-exo-yellow transition-colors">
+                            class="bg-white p-6 rounded-xl border border-gray-100 hover:border-exo-yellow transition-all shadow-sm hover:shadow-md">
                             <i class="fa-solid fa-file-signature text-3xl text-exo-yellow mb-4"></i>
                             <h5 class="font-bold mb-2">Proof Submission</h5>
-                            <p class="text-sm text-gray-400">Cryptographic proofs sent to network.</p>
+                            <p class="text-sm text-gray-500">Cryptographic proofs sent to network.</p>
                         </div>
                         <div
-                            class="bg-white/5 p-6 rounded-xl border border-white/5 hover:border-exo-yellow transition-colors">
+                            class="bg-white p-6 rounded-xl border border-gray-100 hover:border-exo-yellow transition-all shadow-sm hover:shadow-md">
                             <i class="fa-solid fa-scale-balanced text-3xl text-exo-yellow mb-4"></i>
                             <h5 class="font-bold mb-2">On-Chain Settlement</h5>
-                            <p class="text-sm text-gray-400">Rewards distributed based on value.</p>
+                            <p class="text-sm text-gray-500">Rewards distributed based on value.</p>
                         </div>
                     </div>
                 </div>
 
+                <!-- Accumulation Column -->
                 <div
-                    class="col-span-1 bg-gradient-to-br from-[#FFC100] to-[#E6AD00] rounded-2xl p-8 text-exo-dark relative overflow-hidden">
-                    <div class="absolute -right-10 -bottom-10 text-9xl text-[#FFD54F] opacity-20 rotate-12">
+                    class="col-span-1 bg-gradient-to-br from-exo-yellow to-yellow-600 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg">
+                    <div class="absolute -right-10 -bottom-10 text-9xl text-white opacity-10 rotate-12">
                         <i class="fa-solid fa-chart-line"></i>
                     </div>
-                    <h4 class="text-lg font-bold mb-6 uppercase tracking-wider text-[#0A0A0F]/70">What Gets Accumulated
+                    <h4 class="text-lg font-bold mb-6 uppercase tracking-wider text-yellow-50">What Gets Accumulated
                     </h4>
                     <ul class="space-y-4">
-                        <li class="flex items-center gap-3"><i
-                                class="fa-solid fa-check-circle text-[#0A0A0F]/60"></i><span
-                                class="font-medium text-lg">Model Capabilities</span></li>
-                        <li class="flex items-center gap-3"><i
-                                class="fa-solid fa-check-circle text-[#0A0A0F]/60"></i><span
-                                class="font-medium text-lg">Agent Modules</span></li>
-                        <li class="flex items-center gap-3"><i
-                                class="fa-solid fa-check-circle text-[#0A0A0F]/60"></i><span
-                                class="font-medium text-lg">Long-Term Network Influence</span></li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check-circle text-yellow-100"></i>
+                            <span class="font-medium text-lg">Model Capabilities</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check-circle text-yellow-100"></i>
+                            <span class="font-medium text-lg">Agent Modules</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check-circle text-yellow-100"></i>
+                            <span class="font-medium text-lg">Long-Term Network Influence</span>
+                        </li>
                     </ul>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="separator-glow"></div>
-
     <!-- 06 Value Created -->
-    <section id="value" class="py-24 bg-exo-surface">
+    <section id="value" class="py-24 bg-white">
         <div class="max-w-[1440px] mx-auto px-8">
-            <h2 class="text-4xl font-bold mb-16 text-center text-white fade-in-up">How ExoBrain Reshapes the AGI Economy
-            </h2>
+            <h2 class="text-4xl font-bold mb-16 text-center">How ExoBrain Reshapes the AGI Economy</h2>
+
             <div
-                class="grid grid-cols-1 md:grid-cols-3 gap-0 rounded-2xl overflow-hidden border border-white/5 fade-in-up">
+                class="grid grid-cols-1 md:grid-cols-3 gap-0 border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                <!-- Col 1 -->
                 <div
-                    class="p-10 bg-white/[0.02] border-b md:border-b-0 md:border-r border-white/5 hover:bg-white/[0.05] transition-colors">
-                    <div class="text-exo-yellow text-4xl mb-6"><i class="fa-solid fa-dna"></i></div>
-                    <h3 class="text-2xl font-bold mb-4 text-white">Noema</h3>
-                    <p class="text-gray-400">Model capabilities continuously evolve through verifiable intelligence
+                    class="p-10 bg-white border-b md:border-b-0 md:border-r border-gray-200 hover:bg-gray-50 transition-colors">
+                    <div class="text-exo-yellow text-4xl mb-6">
+                        <i class="fa-solid fa-dna"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Noema</h3>
+                    <p class="text-gray-600">Model capabilities continuously evolve through verifiable intelligence
                         contributions.</p>
                 </div>
+
+                <!-- Col 2 -->
                 <div
-                    class="p-10 bg-white/[0.02] border-b md:border-b-0 md:border-r border-white/5 hover:bg-white/[0.05] transition-colors">
-                    <div class="text-exo-yellow text-4xl mb-6"><i class="fa-solid fa-users-gear"></i></div>
-                    <h3 class="text-2xl font-bold mb-4 text-white">Agents</h3>
-                    <p class="text-gray-400">Intelligent services become measurable and economically settleable assets.
+                    class="p-10 bg-white border-b md:border-b-0 md:border-r border-gray-200 hover:bg-gray-50 transition-colors">
+                    <div class="text-exo-yellow text-4xl mb-6">
+                        <i class="fa-solid fa-users-gear"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">Agents</h3>
+                    <p class="text-gray-600">Intelligent services become measurable and economically settleable assets.
                     </p>
                 </div>
-                <div class="p-10 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
-                    <div class="text-exo-yellow text-4xl mb-6"><i class="fa-solid fa-globe"></i></div>
-                    <h3 class="text-2xl font-bold mb-4 text-white">AGI Economy</h3>
-                    <p class="text-gray-400">Computation becomes a productive, long-term economic asset rather than a
+
+                <!-- Col 3 -->
+                <div class="p-10 bg-white hover:bg-gray-50 transition-colors">
+                    <div class="text-exo-yellow text-4xl mb-6">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4">AGI Economy</h3>
+                    <p class="text-gray-600">Computation becomes a productive, long-term economic asset rather than a
                         sunk cost.</p>
                 </div>
             </div>
-            <div class="mt-12 p-6 bg-[#FFC100]/10 rounded-xl border border-[#FFC100]/20 text-center fade-in-up">
-                <p class="text-exo-yellow font-medium"><i class="fa-solid fa-star mr-2"></i>All ExoBrain computation is
-                    dedicated to verifiable AI tasks and permanently accumulated as network intelligence.</p>
+
+            <div class="mt-12 p-6 bg-yellow-50 rounded-xl border border-yellow-100 text-center">
+                <p class="text-yellow-800 font-medium">
+                    <i class="fa-solid fa-star mr-2"></i>
+                    All ExoBrain computation is dedicated to verifiable AI tasks and permanently accumulated as network
+                    intelligence.
+                </p>
             </div>
         </div>
     </section>
 
-    <div class="separator-glow"></div>
-
     <!-- 07 Rewards & Economics -->
-    <section id="rewards" class="py-24 bg-exo-dark tech-grid">
+    <section id="rewards" class="py-24 bg-gray-50 tech-grid">
         <div class="max-w-[1440px] mx-auto px-8">
-            <div class="text-center mb-16 fade-in-up">
-                <h2 class="text-4xl font-bold mb-2 text-white">Beyond Block Rewards</h2>
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-2">Beyond Block Rewards</h2>
                 <h3 class="text-2xl text-exo-yellow font-bold mb-4">Long-Term Intelligence Rights</h3>
                 <p class="text-sm text-gray-500 uppercase tracking-widest">All rewards originate from verifiable AI
                     intelligence contributions</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 fade-in-up">
-                <div class="glass-card p-8 rounded-2xl border-t-2 border-white/10">
-                    <h4 class="text-lg font-bold text-gray-500 mb-2">Layer 1</h4>
-                    <h3 class="text-2xl font-bold text-white mb-4">PoAC Block Rewards</h3>
-                    <div class="text-3xl font-mono text-exo-yellow mb-2">$NOOS</div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border-t-4 border-gray-300">
+                    <h4 class="text-lg font-bold text-gray-400 mb-2">Layer 1</h4>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">PoAC Block Rewards</h3>
+                    <div class="text-3xl font-mono text-gray-800 mb-2">$NOOS</div>
                     <p class="text-sm text-gray-500">Base incentive for network participation and uptime.</p>
                 </div>
+
+                <!-- Card 2 -->
                 <div
-                    class="glass-card p-8 rounded-2xl border-t-2 border-exo-yellow transform md:-translate-y-4 shadow-glow">
-                    <h4 class="text-lg font-bold text-exo-yellow mb-2">Layer 2</h4>
-                    <h3 class="text-2xl font-bold text-white mb-4">Model &amp; Agent Incentives</h3>
-                    <div class="text-3xl font-mono text-exo-yellow mb-2">Royalties</div>
+                    class="bg-white p-8 rounded-2xl shadow-sm border-t-4 border-yellow-400 transform md:-translate-y-4">
+                    <h4 class="text-lg font-bold text-yellow-600 mb-2">Layer 2</h4>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">Model & Agent Incentives</h3>
+                    <div class="text-3xl font-mono text-gray-800 mb-2">Royalties</div>
                     <p class="text-sm text-gray-500">Earn from the usage of models and agents you contribute to.</p>
                 </div>
-                <div class="glass-card p-8 rounded-2xl border-t-2 border-white/20">
-                    <h4 class="text-lg font-bold text-gray-500 mb-2">Layer 3</h4>
-                    <h3 class="text-2xl font-bold text-white mb-4">IntelliPoint Weight</h3>
-                    <div class="text-3xl font-mono text-exo-yellow mb-2">Governance</div>
+
+                <!-- Card 3 -->
+                <div class="bg-white p-8 rounded-2xl shadow-sm border-t-4 border-exo-dark">
+                    <h4 class="text-lg font-bold text-gray-600 mb-2">Layer 3</h4>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-4">IntelliPoint Weight</h3>
+                    <div class="text-3xl font-mono text-gray-800 mb-2">Governance</div>
                     <p class="text-sm text-gray-500">Long-term influence over the network's direction.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="separator-glow"></div>
-
     <!-- 08 Why Now -->
-    <section id="why-now" class="py-24 bg-exo-surface">
+    <section id="why-now" class="py-24 bg-white">
         <div class="max-w-[1440px] mx-auto px-8">
             <div class="flex flex-col lg:flex-row gap-16 items-center">
-                <div class="lg:w-1/2 fade-in-up">
-                    <h2 class="text-5xl font-bold mb-8 text-white">Why Now?</h2>
-                    <p class="text-xl text-gray-400 italic border-l-4 border-exo-yellow pl-6 py-2 mb-8">"The earlier
-                        intelligence is contributed, the earlier it becomes foundational to the AGI economy."</p>
+                <div class="lg:w-1/2">
+                    <h2 class="text-5xl font-bold mb-8 text-gray-900">Why Now?</h2>
+                    <p class="text-xl text-gray-600 italic border-l-4 border-exo-yellow pl-6 py-2 mb-8">
+                        "The earlier intelligence is contributed, the earlier it becomes foundational to the AGI
+                        economy."
+                    </p>
                 </div>
-                <div class="lg:w-1/2 space-y-6 fade-in-up">
+
+                <div class="lg:w-1/2 space-y-6">
                     <div
-                        class="flex items-start gap-4 p-6 glass-card rounded-xl hover:border-[#FFC100]/30 group cursor-default">
+                        class="flex items-start gap-4 p-6 bg-gray-50 rounded-xl hover:bg-yellow-50 transition-colors group cursor-default">
                         <div
-                            class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold text-gray-500 group-hover:text-exo-yellow group-hover:border-exo-yellow">
+                            class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-xl font-bold text-gray-400 group-hover:text-exo-yellow group-hover:border-exo-yellow shadow-sm">
                             1</div>
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Testnet Stage</h3>
-                            <p class="text-gray-400">Current phase offers the lowest entry threshold for new nodes.</p>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Testnet Stage</h3>
+                            <p class="text-gray-600">Current phase offers the lowest entry threshold for new nodes.</p>
                         </div>
                     </div>
+
                     <div
-                        class="flex items-start gap-4 p-6 glass-card rounded-xl hover:border-[#FFC100]/30 group cursor-default">
+                        class="flex items-start gap-4 p-6 bg-gray-50 rounded-xl hover:bg-yellow-50 transition-colors group cursor-default">
                         <div
-                            class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold text-gray-500 group-hover:text-exo-yellow group-hover:border-exo-yellow">
+                            class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-xl font-bold text-gray-400 group-hover:text-exo-yellow group-hover:border-exo-yellow shadow-sm">
                             2</div>
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Early Accumulation</h3>
-                            <p class="text-gray-400">Intelligence contributions can be accumulated and compounded early.
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Early Accumulation</h3>
+                            <p class="text-gray-600">Intelligence contributions can be accumulated and compounded early.
                             </p>
                         </div>
                     </div>
+
                     <div
-                        class="flex items-start gap-4 p-6 glass-card rounded-xl hover:border-[#FFC100]/30 group cursor-default">
+                        class="flex items-start gap-4 p-6 bg-gray-50 rounded-xl hover:bg-yellow-50 transition-colors group cursor-default">
                         <div
-                            class="w-12 h-12 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-xl font-bold text-gray-500 group-hover:text-exo-yellow group-hover:border-exo-yellow">
+                            class="w-12 h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-xl font-bold text-gray-400 group-hover:text-exo-yellow group-hover:border-exo-yellow shadow-sm">
                             3</div>
                         <div>
-                            <h3 class="text-xl font-bold text-white mb-2">Network Advantage</h3>
-                            <p class="text-gray-400">IntelliPoint establishes a long-term strategic advantage in the
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Network Advantage</h3>
+                            <p class="text-gray-600">IntelliPoint establishes a long-term strategic advantage in the
                                 ecosystem.</p>
                         </div>
                     </div>
@@ -703,178 +758,258 @@
         </div>
     </section>
 
-    <div class="separator-glow"></div>
-
     <!-- 09 Specs -->
-    <section id="specs" class="py-24 bg-exo-dark text-white tech-grid">
+    <section id="specs" class="py-24 bg-white text-gray-900 border-y border-gray-100">
         <div class="max-w-[1440px] mx-auto px-8">
-            <h2 class="text-3xl font-bold mb-12 text-center fade-in-up">Directional Hardware Requirements</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 fade-in-up">
-                <div class="glass-card p-6 rounded-xl hover:border-[#FFC100]/30"><i
-                        class="fa-solid fa-microchip text-2xl text-exo-yellow mb-4"></i>
+            <h2 class="text-3xl font-bold mb-12 text-center">Directional Hardware Requirements</h2>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <!-- Spec 1 -->
+                <div
+                    class="bg-yellow-50/50 p-6 rounded-xl border border-yellow-100 hover:bg-yellow-50 transition-colors shadow-sm">
+                    <i class="fa-solid fa-microchip text-2xl text-exo-yellow mb-4"></i>
                     <h3 class="font-bold text-lg mb-2">GPU</h3>
-                    <p class="text-sm text-gray-400">High-performance optimized for training &amp; inference.</p>
+                    <p class="text-sm text-gray-600 font-medium">High-performance optimized for training & inference.
+                    </p>
                 </div>
-                <div class="glass-card p-6 rounded-xl hover:border-[#FFC100]/30"><i
-                        class="fa-solid fa-memory text-2xl text-exo-yellow mb-4"></i>
+                <!-- Spec 2 -->
+                <div
+                    class="bg-yellow-50/50 p-6 rounded-xl border border-yellow-100 hover:bg-yellow-50 transition-colors shadow-sm">
+                    <i class="fa-solid fa-memory text-2xl text-exo-yellow mb-4"></i>
                     <h3 class="font-bold text-lg mb-2">Memory</h3>
-                    <p class="text-sm text-gray-400">Sufficient VRAM for model context workloads.</p>
+                    <p class="text-sm text-gray-600 font-medium">Sufficient VRAM for model context workloads.</p>
                 </div>
-                <div class="glass-card p-6 rounded-xl hover:border-[#FFC100]/30"><i
-                        class="fa-solid fa-network-wired text-2xl text-exo-yellow mb-4"></i>
+                <!-- Spec 3 -->
+                <div
+                    class="bg-yellow-50/50 p-6 rounded-xl border border-yellow-100 hover:bg-yellow-50 transition-colors shadow-sm">
+                    <i class="fa-solid fa-network-wired text-2xl text-exo-yellow mb-4"></i>
                     <h3 class="font-bold text-lg mb-2">Network</h3>
-                    <p class="text-sm text-gray-400">High bandwidth, low latency, stable connectivity.</p>
+                    <p class="text-sm text-gray-600 font-medium">High bandwidth, low latency, stable connectivity.</p>
                 </div>
-                <div class="glass-card p-6 rounded-xl hover:border-[#FFC100]/30"><i
-                        class="fa-solid fa-bolt text-2xl text-exo-yellow mb-4"></i>
+                <!-- Spec 4 -->
+                <div
+                    class="bg-yellow-50/50 p-6 rounded-xl border border-yellow-100 hover:bg-yellow-50 transition-colors shadow-sm">
+                    <i class="fa-solid fa-bolt text-2xl text-exo-yellow mb-4"></i>
                     <h3 class="font-bold text-lg mb-2">Power</h3>
-                    <p class="text-sm text-gray-400">Designed for 24/7 continuous operation.</p>
+                    <p class="text-sm text-gray-600 font-medium">Designed for 24/7 continuous operation.</p>
                 </div>
-                <div class="glass-card p-6 rounded-xl hover:border-[#FFC100]/30"><i
-                        class="fa-solid fa-server text-2xl text-exo-yellow mb-4"></i>
+                <!-- Spec 5 -->
+                <div
+                    class="bg-yellow-50/50 p-6 rounded-xl border border-yellow-100 hover:bg-yellow-50 transition-colors shadow-sm">
+                    <i class="fa-solid fa-server text-2xl text-exo-yellow mb-4"></i>
                     <h3 class="font-bold text-lg mb-2">Deployment</h3>
-                    <p class="text-sm text-gray-400">Supports standalone and clustered configurations.</p>
+                    <p class="text-sm text-gray-600 font-medium">Supports standalone and clustered configurations.</p>
                 </div>
             </div>
         </div>
     </section>
-
-    <div class="separator-glow"></div>
 
     <!-- 10 Ecosystem -->
-    <section id="ecosystem" class="py-24 bg-exo-surface tech-grid">
-        <div class="max-w-[1440px] mx-auto px-8 text-center fade-in-up">
-            <h2 class="text-4xl font-bold mb-2 text-white">The Full AGI Economic Stack</h2>
+    <section id="ecosystem" class="py-24 bg-white tech-grid">
+        <div class="max-w-[1440px] mx-auto px-8 text-center">
+            <h2 class="text-4xl font-bold mb-2">The Full AGI Economic Stack</h2>
             <p class="text-gray-500 mb-12">Become a Foundational Intelligence Node in the AGI Economy</p>
+
             <div class="flex flex-wrap justify-center items-center gap-4 md:gap-8 max-w-4xl mx-auto">
-                <span class="px-6 py-3 bg-exo-yellow text-exo-dark rounded-lg font-bold shadow-glow">ExoBrain</span>
-                <i class="fa-solid fa-arrow-right text-white/20"></i>
+                <span class="px-6 py-3 bg-exo-dark text-white rounded-lg font-bold shadow-lg">ExoBrain</span>
+                <i class="fa-solid fa-arrow-right text-gray-300"></i>
+                <span class="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg font-medium">Noos</span>
+                <i class="fa-solid fa-arrow-right text-gray-300"></i>
                 <span
-                    class="px-6 py-3 bg-white/5 border border-white/10 text-gray-300 rounded-lg font-medium">Noos</span>
-                <i class="fa-solid fa-arrow-right text-white/20"></i>
+                    class="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg font-medium">Noema</span>
+                <i class="fa-solid fa-arrow-right text-gray-300"></i>
                 <span
-                    class="px-6 py-3 bg-white/5 border border-white/10 text-gray-300 rounded-lg font-medium">Noema</span>
-                <i class="fa-solid fa-arrow-right text-white/20"></i>
+                    class="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg font-medium">Agents</span>
+                <i class="fa-solid fa-arrow-right text-gray-300"></i>
                 <span
-                    class="px-6 py-3 bg-white/5 border border-white/10 text-gray-300 rounded-lg font-medium">Agents</span>
-                <i class="fa-solid fa-arrow-right text-white/20"></i>
-                <span
-                    class="px-6 py-3 bg-white/5 border border-white/10 text-gray-300 rounded-lg font-medium">Applications</span>
+                    class="px-6 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg font-medium">Applications</span>
             </div>
         </div>
     </section>
-
-    <div class="separator-glow"></div>
 
     <!-- 11 Final CTA -->
-    <section id="cta" class="py-32 bg-exo-dark relative overflow-hidden">
-        <div
-            class="orb w-[600px] h-[600px] bg-[#FFC100] opacity-[0.08] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+    <section id="cta" class="py-24 bg-exo-yellow relative overflow-hidden">
+        <canvas id="cta-particles" class="absolute inset-0 w-full h-full"
+            style="pointer-events: none; z-index: 1;"></canvas>
+        <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-y-1/2 translate-x-1/2">
         </div>
-        <div class="absolute inset-0 tech-grid"></div>
-        <div class="max-w-[1440px] mx-auto px-8 text-center relative z-10 fade-in-up">
-            <h2 class="text-4xl md:text-5xl font-bold text-white mb-8 leading-tight">Become a Foundational Intelligence
-                Node<br>of the AGI Economy</h2>
-            <button class="px-10 py-5 btn-gold text-xl rounded-xl hover:scale-105 transition-all">Run ExoBrain
-                Nodes</button>
-        </div>
-    </section>
 
-    <!-- Footer -->
-    <footer id="footer" class="bg-exo-surface border-t border-white/5 pt-16 pb-8">
-        <div class="max-w-[1440px] mx-auto px-8">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-                <div class="col-span-1">
-                    <div class="flex items-center gap-2 mb-6">
-                        <div class="w-6 h-6 text-exo-yellow">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 370.504 370.506" fill="currentColor">
-                                <path
-                                    d="M172.08,369.3a28.857,28.857,0,0,1-7.891-26.143c-.807-12.814-4.364-16.61-4.364-16.61l.033-.03-21.381-21.381-.051.045s-3.324-4.223-19.82-5.919l-.034,0a28.881,28.881,0,1,1,24.363-24.684c.025.111.048.227.067.346.022-.435.046-.866.08-1.3.031-.319.052.4.052,1.1a9.032,9.032,0,0,1-.025,1.118.63.63,0,0,1-.021-.183c-.019-.263-.046-.505-.086-.735a32.933,32.933,0,0,0,5.2,18.942l23.127,23.127c1.864,1.43,6.822,4.015,17.739,3.192l.382-.025A28.882,28.882,0,1,1,172.08,369.3Zm78.186-78.188a28.878,28.878,0,1,1,20.421,8.459A28.878,28.878,0,0,1,250.266,291.107Zm78.186-78.185a28.878,28.878,0,1,1,20.421,8.459A28.878,28.878,0,0,1,328.451,212.922Zm-156.371,0a29.176,29.176,0,0,1-2.2-2.464q-.108-.1-.217-.2a46.817,46.817,0,0,0-18.918-10.333H76.706l-.006.07s-8.136.813-16.324,8.208a28.846,28.846,0,1,1,.433-30.713c7.659,7.177,13.729,7.568,14.67,7.584h75.531a34.531,34.531,0,0,0,17.6-8.808,28.885,28.885,0,1,1,3.469,36.657Zm78.186-78.185a28.878,28.878,0,1,1,20.421,8.459A28.878,28.878,0,0,1,250.266,134.736Zm-156.371,0a28.883,28.883,0,0,1,27.2-48.5c.279.006.57.021.876.047,7.674.64,12.117-1.742,14.271-3.465l1.637-1.637,23.13-23.132c1.332-1.736,3.665-6.159,3.313-15.592a28.884,28.884,0,1,1,29.858,22.5c-.583.046-1.222.071-1.922.073-16.916.05-21.691,4.527-21.691,4.527l-.03-.034L149.151,90.909l.045.05a1.281,1.281,0,0,0-.232.137l-.875.875c-1.329,1.689-3.525,6.061-4.662,17.091-.1.921-.218,1.744-.364,2.475a28.881,28.881,0,0,1-49.169,23.2Z"
-                                    transform="translate(-7.249 -7.249)" />
-                            </svg>
+        <div class="max-w-[1440px] mx-auto px-8 relative" style="z-index: 2;">
+            <div class="flex flex-col md:flex-row items-center justify-between mb-24 pt-12">
+                <div class="max-w-2xl">
+                    <h2 class="text-4xl md:text-5xl font-bold text-exo-dark mb-10 leading-tight">
+                        Become a Foundational Intelligence Node<br>of the AGI Economy
+                    </h2>
+                    <button
+                        class="px-10 py-5 bg-exo-dark text-white text-xl font-bold rounded-xl hover:bg-gray-800 hover:scale-105 transition-all shadow-[0_10px_30px_rgba(0,0,0,0.15)]">
+                        Run ExoBrain Nodes
+                    </button>
+                </div>
+                <div class="mt-16 md:mt-0 md:mr-12 animate-[float_8s_ease-in-out_infinite] hidden md:block">
+                    <img src="cta_logo.png" alt="ExoBrain Logo"
+                        class="w-64 h-64 md:w-80 md:h-80 object-contain drop-shadow-[0_20px_50px_rgba(0,0,0,0.1)] opacity-90">
+                </div>
+            </div>
+
+            <!-- Integrated Premium Footer Card -->
+            <footer
+                class="bg-white/95 backdrop-blur-md rounded-[2.5rem] shadow-[0_20px_60px_rgba(0,0,0,0.08)] border border-white/60 p-12 md:p-16 text-left mb-12">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+                    <div class="col-span-1">
+                        <div class="flex items-center gap-2 mb-6">
+                            <div class="w-6 h-6 text-exo-yellow">
+                                <svg viewBox="0 0 100 100" fill="currentColor">
+                                    <circle cx="50" cy="50" r="10" />
+                                    <circle cx="20" cy="50" r="8" />
+                                    <circle cx="80" cy="50" r="8" />
+                                    <path d="M28 50 L42 50 M58 50 L72 50" stroke="currentColor" stroke-width="4"
+                                        stroke-linecap="round" />
+                                </svg>
+                            </div>
+                            <span class="text-xl font-bold text-gray-900">ExoBrain</span>
                         </div>
-                        <span class="text-lg font-bold text-white">ExoBrain</span>
+                        <p class="text-gray-500 text-sm leading-relaxed">Building the hardware foundation for verifiable
+                            artificial general intelligence.</p>
                     </div>
-                    <p class="text-gray-500 text-sm">Building the hardware foundation for verifiable artificial general
-                        intelligence.</p>
-                </div>
-                <div>
-                    <h4 class="font-bold text-white mb-4">Product</h4>
-                    <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-exo-yellow transition-colors">Hardware Specs</a></li>
-                        <li><a href="#" class="hover:text-exo-yellow transition-colors">PoAC Protocol</a></li>
-                        <li><a href="#" class="hover:text-exo-yellow transition-colors">Testnet</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-white mb-4">Resources</h4>
-                    <ul class="space-y-2 text-sm text-gray-500">
-                        <li><a href="#" class="hover:text-exo-yellow transition-colors">Documentation</a></li>
-                        <li><a href="#" class="hover:text-exo-yellow transition-colors">Whitepaper</a></li>
-                        <li><a href="#" class="hover:text-exo-yellow transition-colors">Explorer</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h4 class="font-bold text-white mb-4">Community</h4>
-                    <div class="flex gap-4">
-                        <a href="#"
-                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:bg-exo-yellow hover:text-exo-dark transition-colors"><i
-                                class="fa-brands fa-x-twitter"></i></a>
-                        <a href="#"
-                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:bg-exo-yellow hover:text-exo-dark transition-colors"><i
-                                class="fa-brands fa-discord"></i></a>
-                        <a href="#"
-                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-gray-500 hover:bg-exo-yellow hover:text-exo-dark transition-colors"><i
-                                class="fa-brands fa-github"></i></a>
-                    </div>
-                </div>
-            </div>
-            <div
-                class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
-                <p>&copy; 2024 ExoBrain Network. All rights reserved.</p>
-                <div class="flex gap-6 mt-4 md:mt-0">
-                    <a href="#" class="hover:text-exo-yellow transition-colors">Privacy Policy</a>
-                    <a href="#" class="hover:text-exo-yellow transition-colors">Terms of Service</a>
-                </div>
-            </div>
-        </div>
-    </footer>
 
-    <script>
-            // Particle Network Animation
-            (function () {
-                const canvas = document.getElementById('particle-canvas');
-                if (!canvas) return;
-                const ctx = canvas.getContext('2d');
-                let particles = [];
-                let mouse = { x: null, y: null };
-                const COUNT = 80, CONN = 150, MR = 200;
-                function resize() { const h = canvas.parentElement; canvas.width = h.offsetWidth; canvas.height = h.offsetHeight; }
-                function init() { particles = []; for (let i = 0; i < COUNT; i++) particles.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height, vx: (Math.random() - 0.5) * 0.6, vy: (Math.random() - 0.5) * 0.6, r: Math.random() * 2 + 1 }); }
-                function draw() {
-                    ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    particles.forEach((p, i) => {
-                        p.x += p.vx; p.y += p.vy;
-                        if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-                        if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-                        if (mouse.x !== null) { const dx = p.x - mouse.x, dy = p.y - mouse.y, d = Math.sqrt(dx * dx + dy * dy); if (d < MR) { const f = (MR - d) / MR * 0.02; p.vx += dx * f; p.vy += dy * f; } }
-                        p.vx *= 0.99; p.vy *= 0.99;
-                        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fillStyle = 'rgba(255,193,0,0.5)'; ctx.fill();
-                        for (let j = i + 1; j < particles.length; j++) { const q = particles[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.sqrt(dx * dx + dy * dy); if (d < CONN) { ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.strokeStyle = `rgba(255,193,0,${0.15 * (1 - d / CONN)})`; ctx.lineWidth = 0.5; ctx.stroke(); } }
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-6 tracking-wide">Product</h4>
+                        <ul class="space-y-3 text-sm text-gray-600">
+                            <li><a href="#" class="hover:text-exo-yellow transition-colors">Hardware Specs</a></li>
+                            <li><a href="#" class="hover:text-exo-yellow transition-colors">PoAC Protocol</a></li>
+                            <li><a href="#" class="hover:text-exo-yellow transition-colors">Testnet</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-6 tracking-wide">Resources</h4>
+                        <ul class="space-y-3 text-sm text-gray-600">
+                            <li><a href="#" class="hover:text-exo-yellow transition-colors">Documentation</a></li>
+                            <li><a href="#" class="hover:text-exo-yellow transition-colors">Whitepaper</a></li>
+                            <li><a href="#" class="hover:text-exo-yellow transition-colors">Explorer</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="font-bold text-gray-900 mb-6 tracking-wide">Community</h4>
+                        <div class="flex gap-4">
+                            <a href="#"
+                                class="w-11 h-11 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-exo-yellow hover:text-white transition-all shadow-sm">
+                                <i class="fa-brands fa-x-twitter"></i>
+                            </a>
+                            <a href="#"
+                                class="w-11 h-11 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-exo-yellow hover:text-white transition-all shadow-sm">
+                                <i class="fa-brands fa-discord"></i>
+                            </a>
+                            <a href="#"
+                                class="w-11 h-11 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:bg-exo-yellow hover:text-white transition-all shadow-sm">
+                                <i class="fa-brands fa-github"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-400">
+                    <p>&copy; 2024 ExoBrain Network. All rights reserved.</p>
+                    <div class="flex gap-8 mt-4 md:mt-0 font-medium">
+                        <a href="#" class="hover:text-gray-900 transition-colors">Privacy Policy</a>
+                        <a href="#" class="hover:text-gray-900 transition-colors">Terms of Service</a>
+                    </div>
+                </div>
+            </footer>
+        </div>
+        <script>
+                (function () {
+                    const canvas = document.getElementById('cta-particles');
+                    const ctx = canvas.getContext('2d');
+                    const section = document.getElementById('cta');
+
+                    let particles = [];
+                    let mouse = { x: -1000, y: -1000 };
+
+                    const PARTICLE_COUNT = 200;
+                    const BREATH_CYCLE = 6000; // 6 seconds
+
+                    function resize() {
+                        const rect = section.getBoundingClientRect();
+                        canvas.width = rect.width;
+                        canvas.height = rect.height;
+                    }
+
+                    function init() {
+                        resize();
+                        particles = [];
+
+                        const cx = canvas.width / 2;
+                        const cy = canvas.height * 0.38;
+
+                        const phi = (1 + Math.sqrt(5)) / 2;
+                        const goldenAngle = 2 * Math.PI * (1 - 1 / phi);
+
+                        for (let i = 0; i < PARTICLE_COUNT; i++) {
+                            const r = Math.sqrt(i) * 18;
+                            const theta = i * goldenAngle;
+
+                            particles.push({
+                                ox: Math.cos(theta) * r,
+                                oy: Math.sin(theta) * r,
+                                size: Math.random() * 1.5 + 0.5,
+                                color: i % 3 === 0 ? 'rgba(255, 255, 255, 0.8)' : 'rgba(255, 193, 7, 0.6)',
+                                phaseOffset: Math.random() * Math.PI * 2,
+                                breathScale: 0.05 + Math.random() * 0.05
+                            });
+                        }
+                    }
+
+                    function animate() {
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                        const cx = canvas.width / 2;
+                        const cy = canvas.height * 0.38;
+                        const time = Date.now();
+
+                        // Global Natural Breathing (6s cycle)
+                        const globalPhase = (time % BREATH_CYCLE) / BREATH_CYCLE * Math.PI * 2;
+                        const globalBreath = 1 + Math.sin(globalPhase) * 0.06;
+
+                        for (let p of particles) {
+                            // Individual micro-breathing for "natural" texture
+                            const individualBreath = 1 + Math.sin(time * 0.001 + p.phaseOffset) * 0.1;
+
+                            // Calculate position based on breathing
+                            const x = cx + p.ox * globalBreath;
+                            const y = cy + p.oy * globalBreath;
+
+                            // Subtle parallax relative to mouse
+                            const dx = (mouse.x - cx) * 0.02;
+                            const dy = (mouse.y - cy) * 0.02;
+
+                            ctx.beginPath();
+                            const radius = p.size * individualBreath;
+
+                            // Draw elegant soft particles
+                            ctx.arc(x + dx, y + dy, radius, 0, Math.PI * 2);
+                            ctx.fillStyle = p.color;
+                            ctx.fill();
+                        }
+                        requestAnimationFrame(animate);
+                    }
+
+                    window.addEventListener('mousemove', (e) => {
+                        const rect = canvas.getBoundingClientRect();
+                        mouse.x = e.clientX - rect.left;
+                        mouse.y = e.clientY - rect.top;
                     });
-                    requestAnimationFrame(draw);
-                }
-                canvas.addEventListener('mousemove', e => { const r = canvas.getBoundingClientRect(); mouse.x = e.clientX - r.left; mouse.y = e.clientY - r.top; });
-                canvas.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
-                window.addEventListener('resize', () => { resize(); init(); });
-                resize(); init(); draw();
-            })();
-        // Scroll Fade-in
-        (function () {
-            const obs = new IntersectionObserver(entries => { entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }); }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-            document.querySelectorAll('.fade-in-up').forEach(el => obs.observe(el));
-        })();
-    </script>
+
+                    window.addEventListener('resize', resize);
+
+                    init();
+                    animate();
+                })();
+        </script>
+
+
 
 </body>
 
